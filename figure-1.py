@@ -45,7 +45,6 @@ class BivariateFoodMap:
 
     def map_values_to_colors(self, y_histco2, food_insecurity, x_cutoffs, cmap):
         """Maps the data values to the appropriate colors."""
-        # Note the swapped parameters in the function signature
         
         # Get the bin indices (subtract 1 to convert to 0-based index)
         x_bin_index = np.digitize(food_insecurity, x_cutoffs, right=True) - 1
@@ -54,14 +53,10 @@ class BivariateFoodMap:
         # Clip to valid range
         x_bin_index = np.clip(x_bin_index, 0, len(x_cutoffs) - 2)
         y_bin_index = np.clip(y_bin_index, 0, len(self.y_cutoffs) - 2)
-        
-        # Calculate the color index
-        # Note: x_bin_index determines the position within each row (purple scale)
-        #       y_bin_index determines which row (red scale)
         index = x_bin_index + y_bin_index * (len(x_cutoffs) - 1)
         return cmap(index / (9 - 1))  # Normalize to [0, 1]
 
-    def create_map(self, x_column, x_no_column, x_cutoffs, output_path, x_label):
+    def create_map(self, x_column, x_cutoffs, output_path, x_label):
         """Creates and saves a bivariate map."""
         cmap = self.generate_bivariate_cmap()
         
@@ -89,15 +84,15 @@ class BivariateFoodMap:
 
         # Merge data
         merged_world = self.world.merge(
-            self.df[['Country', 'color_hex', 'y_IDR', 'no_IDR', x_column, x_no_column]], 
+            self.df[['Country', 'color_hex', 'y_IDR', 'no_IDR', x_column]], 
             left_on='NAME', 
             right_on='Country', 
             how='left'
         )
 
         # Add hatching patterns
-        merged_world['hatch'] = merged_world['y_IDR'].apply(lambda a: '//////' if a > 98 else '')
-        merged_world['dots'] = merged_world[x_column].apply(lambda a: '....' if a > 30 else '')
+        merged_world['hatch'] = merged_world['y_IDR'].apply(lambda a: '//////' if float(a) > 95 else '')
+        merged_world['dots'] = merged_world['no_IDR'].apply(lambda a: '....' if float(a) < 1 else '')
 
         # Plot countries and hatches
         for _, row in merged_world.iterrows():
@@ -132,10 +127,9 @@ class BivariateFoodMap:
 # Create maps
 mapper = BivariateFoodMap()
 
-# Map 1: Severe food insecurity
+# Map 1: Undernourishment
 mapper.create_map(
     x_column='x_Undernourishment',
-    x_no_column='no_Undernourishment',
     x_cutoffs=[0, 5, 20, 55],
     output_path='/Users/cmor7802/repos/bivariate-map/outputs/figure-1-undernourishment.jpeg',
     x_label='Prevelance of Undernourishment (%)'
