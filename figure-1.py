@@ -84,7 +84,7 @@ class BivariateFoodMap:
         )
 
         # Create figure
-        fig = plt.figure(figsize=(20, 10))
+        fig = plt.figure(figsize=(26, 13))
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
 
         # Merge data
@@ -96,8 +96,8 @@ class BivariateFoodMap:
         )
 
         # Add hatching patterns
-        merged_world['hatch'] = merged_world['no_IDR'].apply(lambda a: '//////' if a == " " else '')
-        merged_world['dots'] = merged_world[x_no_column].apply(lambda a: '....' if a == " " else '')
+        merged_world['hatch'] = merged_world['y_IDR'].apply(lambda a: '//////' if a > 98 else '')
+        merged_world['dots'] = merged_world[x_column].apply(lambda a: '....' if a > 30 else '')
 
         # Plot countries and hatches
         for _, row in merged_world.iterrows():
